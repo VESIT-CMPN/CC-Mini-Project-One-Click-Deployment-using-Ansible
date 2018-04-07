@@ -1,0 +1,15 @@
+Installation Steps:
+
+yum install ansible
+adduser admin
+passwd admin
+su - admin
+ssh-keygen
+ssh-copy-id admin@localhost
+ssh localhost
+exit and login with root user
+visudo
+admin ALL=(ALL) NOPASSWD:ALL
+su - admin
+sudo yum install python-pip
+sudo pip install awscli

@@ -1,0 +1,182 @@
+==================================
+SCRIPT NAME: test_facts.yml  
+==================================
+--- # Gather EC2 Facts from my remote instance(s)
+- hosts: aws
+  remote_user: ec2-user
+  become: yes
+  connection: ssh
+  gather_facts: yes
+  tasks:
+  - name: Gather the EC2 Facts about running instance(s)
+    ec2_facts:
+    register: all_facts
+  - name: Display the facts 
+    debug: var=all_facts
+
+execute using:
+ansible-playbook test_facts.yml
+
+
+2>
+
+==================================
+SCRIPT NAME: awsshell.yml  
+==================================
+--- # AWS EC2 Instance Communication Shell Command Example
+- hosts: aws
+  remote_user: ec2-user
+  become_method: sudo
+  gather_facts: yes
+  connection: ssh
+  tasks:
+  - name: Execute a Shell Command for Listing the Directory
+    shell: ls -al ~
+    register: result
+  - name: Display the results in JSON format
+    debug: var=result
+
+ansible-playbook awsshell.yml
+
+
+3>create aws key pair:
+awsec2key_create.yml
+
+- hosts: localhost
+  connection: local
+  remote_user: admin
+  become: yes
+  gather_facts: no
+  vars_files:
+  - files/awscreds.yml
+  tasks:
+  - name: Create a New Key Pair - MyKeyPairTestAWS
+    ec2_key:
+      aws_access_key: "{{ aws_id }}"
+      aws_secret_key: "{{ aws_key }}"
+      name: MyKeyPairTestAWS
+      region: us-east-2
+      state: present
+
+
+4>remove aws key pair:
+awsec2key_remove.yml
+- hosts: localhost
+  connection: local
+  remote_user: admin
+  become: yes
+  gather_facts: no
+  vars_files:
+  - files/awscreds.yml
+  tasks:
+  - name: Create a New Key Pair - MyKeyPairTestAWS
+    ec2_key:
+      aws_access_key: "{{ aws_id }}"
+      aws_secret_key: "{{ aws_key }}"
+      name: MyKeyPairTestAWS
+      region: us-east-2
+      state: absent
+
+
+5> Create AWS VPC:
+
+awsec2key_create.yml
+- hosts: localhost
+  connection: local
+  remote_user: admin
+  become: yes
+  gather_facts: no
+  vars_files:
+  - files/awscreds.yml
+  tasks:
+  - name: Create a New VPC Called MyNewVPC
+    ec2_vpc_net:
+      aws_access_key: "{{ aws_id }}"
+      aws_secret_key: "{{ aws_key }}"
+      region: "{{ aws_region }}"
+      name: MyNewVPC
+      state: present
+      cidr_block: 172.17.1.0/24
+    register: vpcnetblock
+  - name: Print the resulting JSON output
+    debug: var=vpcnetblock
+
+6>
+AWS START/STOP/TERMINATE EC2 INSTANCE
+To stop ec2 instance
+- hosts: localhost
+  connection: local
+  remote_user: admin
+  become: yes
+  gather_facts: no
+  vars_files:
+  - files/awscreds.yml
+  tasks:
+  - name: Manage the state of an instance
+    ec2:
+      aws_access_key: "{{ aws_id }}"
+      aws_secret_key: "{{ aws_key }}"
+      region: "{{ aws_region }}"
+      instance_ids: i-04e61e270251a6233
+      state: stopped
+7>
+To start EC2 Instance
+
+- hosts: localhost
+  connection: local
+  remote_user: admin
+  become: yes
+  gather_facts: no
+  vars_files:
+  - files/awscreds.yml
+  tasks:
+  - name: Manage the state of an instance
+    ec2:
+      aws_access_key: "{{ aws_id }}"
+      aws_secret_key: "{{ aws_key }}"
+      region: "{{ aws_region }}"
+      instance_ids: i-04e61e270251a6233
+      state: running
+
+
+8>
+To Terminate EC2 Instance
+
+- hosts: localhost
+  connection: local
+  remote_user: admin
+  become: yes
+  gather_facts: no
+  vars_files:
+  - files/awscreds.yml
+  tasks:
+  - name: Manage the state of an instance
+    ec2:
+      aws_access_key: "{{ aws_id }}"
+      aws_secret_key: "{{ aws_key }}"
+      region: "{{ aws_region }}"
+      instance_ids: i-04e61e270251a6233
+      state: absent
+
+9>
+To Provision new ec2 instance
+
+--- # EC2 MODULE PROVISIONING EXAMPLE
+- hosts: localhost
+  connection: local
+  remote_user: admin
+  become: yes
+  gather_facts: no
+  vars_files:
+  - files/awscreds.yml
+  tasks:
+  - name: Basic provisioning of two t2.micro EC2 instances
+    ec2:
+      aws_access_key: "{{ aws_id }}"
+      aws_secret_key: "{{ aws_key }}"
+      region: "{{ aws_region }}"
+      image: ami-25615740
+      instance_type: t2.micro
+      count: 1
+
+if count is 2 it will create 2 instance
